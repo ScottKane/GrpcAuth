@@ -1,4 +1,5 @@
-﻿@inherits LayoutComponentBase
+﻿@using GrpcAuth.Client.Extensions
+@inherits LayoutComponentBase
 
 <MudThemeProvider Theme="@_theme" />
 <MudDialogProvider />
@@ -8,12 +9,52 @@
     <MudAppBar Elevation="0">
         <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="@((e) => DrawerToggle())" />
         <MudSpacer />
-        <MudIconButton Icon="@Icons.Custom.Brands.MudBlazor" Color="Color.Inherit" Link="https://mudblazor.com/" Target="_blank" />
-        <MudIconButton Icon="@Icons.Custom.Brands.GitHub" Color="Color.Inherit" Link="https://github.com/MudBlazor/MudBlazor/" Target="_blank" />
+        <AuthorizeView>
+            <NotAuthorized>
+                <MudIconButton Icon="@Icons.Filled.AccountCircle" Color="Color.Inherit" Target="_blank" OnClick="ShowLoginDialog" />
+            </NotAuthorized>
+            <Authorized>
+                <MudMenu AnchorOrigin="Origin.BottomRight"
+                         Icon="@Icons.Filled.AccountCircle"
+                         Color="Color.Inherit"
+                         Class="mx-1"
+                         LockScroll="true"
+                         TransformOrigin="Origin.TopRight">
+                    <ChildContent>
+                        <div class="pb-4"
+                             style="min-width: 260px; margin-bottom: 0 !important">
+                            <MudCard Elevation="0" Square="true" Class="ma-0">
+                                <MudCardHeader>
+                                    <CardHeaderAvatar>
+                                        <MudAvatar Size="Size.Medium" Color="Color.Primary" Class="ma-2">
+                                            @_initials
+                                        </MudAvatar>
+                                    </CardHeaderAvatar>
+                                    <CardHeaderContent>
+                                        <MudText Typo="Typo.body1">@_fullName</MudText>
+                                        <MudText Typo="Typo.body2">@_email</MudText>
+                                    </CardHeaderContent>
+                                </MudCardHeader>
+                            </MudCard>
+                            <MudDivider Class="my-2"/>
+                            <div class="mt-4 mx-4">
+                                <MudButton Color="Color.Default"
+                                           FullWidth="true"
+                                           StartIcon="@Icons.Material.Filled.Logout"
+                                           OnClick="Logout"
+                                           Variant="Variant.Outlined">
+                                    Logout
+                                </MudButton>
+                            </div>
+                        </div>
+                    </ChildContent>
+                </MudMenu>
+            </Authorized>
+        </AuthorizeView>
     </MudAppBar>
     <MudDrawer @bind-Open="_drawerOpen" Elevation="1">
         <MudDrawerHeader>
-            <MudText Typo="Typo.h6">House of Trade</MudText>
+            <MudText Typo="Typo.h6">GrpcAuth</MudText>
         </MudDrawerHeader>
         <NavMenu />
     </MudDrawer>
@@ -31,6 +72,49 @@
     {
         Palette = new Palette()
     };
+    
+    private string _email = string.Empty;
+    private string _initials = string.Empty;
+    private string _fullName = string.Empty;
+    
+    protected override async Task OnInitializedAsync()
+    {
+        var state = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var user = state.User;
+        if (user.Identity!.IsAuthenticated)
+        {
+            var firstName = user.GetFirstName();
+            var lastName = user.GetLastName();
+            _email = user.GetEmail();
+            _initials = $"{firstName[0]}{lastName[0]}";
+            _fullName = $"{firstName} {lastName}";
+        }
+    }
+
+    private async Task ShowLoginDialog()
+    {
+        var parameters = new DialogParameters();
+        var options = new DialogOptions
+        {
+            CloseButton = true,
+            MaxWidth = MaxWidth.Medium,
+            FullWidth = true,
+            DisableBackdropClick = true
+        };
+        var dialog = DialogService.Show<Login>(
+            "Login",
+            parameters,
+            options);
+        await dialog.Result;
+    }
+    
+    private async Task Logout()
+    {
+        var parameters = new DialogParameters();
+        var options = new DialogOptions { CloseButton = true, MaxWidth = MaxWidth.ExtraSmall, FullWidth = true };
+        var dialog = DialogService.Show<LogoutConfirmation>("Logout", parameters, options);
+        await dialog.Result;
+    }
 
     private void DrawerToggle() => _drawerOpen = !_drawerOpen;
 }

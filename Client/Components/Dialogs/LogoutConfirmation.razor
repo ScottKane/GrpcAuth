@@ -1,0 +1,28 @@
+<MudDialog>
+    <TitleContent>
+        <MudText Typo="Typo.h6">
+            <MudIcon Icon="@Icons.Material.Filled.Logout" Class="mr-3 mb-n1" />
+            Logout
+        </MudText>
+    </TitleContent>
+    <DialogContent>
+        <MudText>Are you sure you want to log out?</MudText>
+    </DialogContent>
+    <DialogActions>
+        <MudButton StartIcon="@Icons.Filled.Cancel" OnClick="Cancel">Cancel</MudButton>
+        <MudButton StartIcon="@Icons.Filled.Logout" Color="Color.Error" Variant="Variant.Filled" OnClick="SubmitAsync">Logout</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter] private MudDialogInstance MudDialog { get; set; } = default!;
+
+    private async Task SubmitAsync()
+    {
+        await AuthenticationManager.Logout();
+        NavigationManager.NavigateTo("/", true);
+        MudDialog.Close(DialogResult.Ok(true));
+    }
+    
+    private void Cancel() => MudDialog.Cancel();
+}

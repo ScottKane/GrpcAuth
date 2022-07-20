@@ -1,0 +1,36 @@
+<MudDialog>
+    <TitleContent>
+        <MudText Typo="Typo.h6">
+            <MudIcon Icon="@Icons.Material.Filled.Login" Class="mr-3 mb-n1" />
+            Login
+        </MudText>
+    </TitleContent>
+    <DialogContent>
+        <EditForm Model="@_tokenModel" OnValidSubmit="SubmitAsync">
+            <MudGrid>
+                <DataAnnotationsValidator />
+                <MudItem xs="12">
+                    <MudTextField T="string" Label="E-mail" Variant="Variant.Outlined"
+                                  @bind-Value="_tokenModel.Email" For="@(() => _tokenModel.Email)" />
+                </MudItem>
+                <MudItem xs="12">
+                    <MudTextField Label="Password" Variant="Variant.Outlined"
+                                  @bind-Value="_tokenModel.Password" For="@(() => _tokenModel.Password)"
+                                  InputType="@_passwordInput" Adornment="Adornment.End" AdornmentIcon="@_passwordInputIcon" OnAdornmentClick="TogglePasswordVisibility" />
+                </MudItem>
+                <MudItem xs="12" Class="d-flex justify-center">
+                    <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Primary" Size="Size.Large" Style="width: 100%;">Sign In</MudButton>
+                </MudItem>
+                <MudItem xs="12" Class="d-flex justify-center">
+                    <MudButton OnClick="ShowRegisterDialog" Color="Color.Primary" Size="Size.Large" Style="width: 100%;">Register</MudButton>
+                </MudItem>
+                <MudItem xs="12">
+                    <MudButton OnClick="FillAdministratorCredentials">Fill Administrator Credentials</MudButton>
+                </MudItem>
+                <MudItem xs="12">
+                    <MudButton OnClick="FillBasicUserCredentials">Fill Basic User Credentials</MudButton>
+                </MudItem>
+            </MudGrid>
+        </EditForm>
+    </DialogContent>
+</MudDialog>
